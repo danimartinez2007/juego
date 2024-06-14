@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego de Carreras en JavaScript</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<script>
+  let playerCar;
+  let obstacles = [];
+  let score = 0;
+  let gameover = false;
+
+  function setup() {
+    createCanvas(400, 600);
+    playerCar = new Car(width / 2, height - 100);
+    obstacles.push(new Obstacle());
+  }
+
+  function draw() {
+    background(173, 216, 230); // Cambia el color de fondo aquí (azul claro)
+    if (!gameover) {
+      playerCar.show();
+      playerCar.move();
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        obstacles[i].show();
+        obstacles[i].move();
+        if (playerCar.hits(obstacles[i])) {
+          gameover = true;
+        }
+        if (obstacles[i].offscreen()) {
+          obstacles.splice(i, 1);
+          score++;
+        }
+      }
+
+      if (frameCount % 50 == 0) {
+        obstacles.push(new Obstacle());
+      }
+
+      textSize(20);
+      fill(255);
+      text("Score: " + score, 20, 30);
+    } else {
+      textSize(32);
+      fill(255);
+      text("Game Over", width / 2 - 100, height / 2);
+    }
+  }
+
+  class Car {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    show() {
+      textSize(40);
+      fill(255);
+      text("🐭", this.x - 20, this.y + 50);
+    }
+
+    move() {
+      if (keyIsDown(LEFT_ARROW) && this.x > 40) {
+        this.x -= 5;
+      }
+      if (keyIsDown(RIGHT_ARROW) && this.x < width - 40) {
+        this.x += 5;
+      }
+    }
+
+    hits(obstacle) {
+      return (
+        this.y < obstacle.y + obstacle.height &&
+        this.y + 80 > obstacle.y &&
+        this.x < obstacle.x + obstacle.width &&
+        this.x + 40 > obstacle.x
+      );
+    }
+  }
+
+  class Obstacle {
+    constructor() {
+      this.x = random(40, width - 40);
+      this.y = -40;
+      this.width = random(30, 60);
+      this.height = 20;
+      this.speed = random(2, 5);
+    }
+
+    show() {
+      textSize(40);
+      fill(255, 0, 0);
+      text("🐱", this.x, this.y + 40);
+    }
+
+    move() {
+      this.y += this.speed;
+    }
+
+    offscreen() {
+      return this.y > height;
+    }
+  }
+</script>
+
+</body>
+</html>
